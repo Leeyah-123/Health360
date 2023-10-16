@@ -12,7 +12,7 @@ export const useApi = (isLoading?: Ref<boolean>) => {
   // include Bearer token to the request if user is logged in
   api.interceptors.request.use((config) => {
     const userSession = useUserStore()
-    // set loading true on request if isLoading is not null
+    // set loading to true on request if isLoading is not null
     if (isLoading) isLoading.value = true
 
     // if user is logged in, append authorization header to the headers object
@@ -25,16 +25,16 @@ export const useApi = (isLoading?: Ref<boolean>) => {
     return config
   })
 
-  // This runs before any response is return
+  // This runs before any response is returned
   api.interceptors.response.use(
     (response) => {
-      // set loading false if isLoading is not null
+      // set loading to false if isLoading is not null
       if (isLoading) isLoading.value = false
 
       return response
     },
     (error) => {
-      // set loading false if isLoading is not null
+      // set loading to false if isLoading is not null
       if (isLoading) isLoading.value = false
 
       // throw error

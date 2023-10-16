@@ -1,0 +1,21 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+@layer base {
+  body {
+    @apply dark:text-light dark:bg-dark;
+  }
+}
+
+@layer components {
+  li:has(a.active) {
+    @apply bg-slate-600;
+  }
+}

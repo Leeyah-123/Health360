@@ -1,4 +1,4 @@
 <template>
-  <h1>Users page</h1>
+  <h2>Users page</h2>
 </template>
 

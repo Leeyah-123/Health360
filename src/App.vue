@@ -9,7 +9,7 @@ import NavbarComponent from './components/layout/NavbarComponent.vue';
     <navbar-component />
   </header>
 
-  <main class="mt-24 ml-10 lg:ml-24">
+  <main class="mt-24 mx-10 lg:mx-56">
     <RouterView />
   </main>
 </template>

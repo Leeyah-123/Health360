@@ -1,3 +1,3 @@
 <template>
-  <div>Consultants View</div>
+  <h2>Consultants Page</h2>
 </template>

@@ -18,14 +18,15 @@ const toggleDropDown = () => dropDownOpen.value = !dropDownOpen.value
     <tr>
       <th class="border text-left px-8 py-4 bg-darkBlue dark:bg-slate-700 text-light" v-for="heading in headings"
         :key="heading">{{ heading }}</th>
-      <th class="border text-left px-8 py-4 bg-darkBlue dark:bg-slate-700 text-light">Actions</th>
+      <th v-if="actions.length > 0" class="border text-left px-8 py-4 bg-darkBlue dark:bg-slate-700 text-light">Actions
+      </th>
     </tr>
 
 
     <tr class="hover:bg-gray-50 focus:bg-gray-300 dark:bg-gray-500 dark:hover:bg-gray-600 dark:focus:bg-gray-700"
       tabindex="0" v-for="row, i in data" :key="i">
       <td class="border px-8 py-4" v-for="item, j in row" :key="i + j">{{ item ? item : 'nil' }}</td>
-      <td class="border px-8 py-4 ml-5 relative">
+      <td class="border px-8 py-4 ml-5 relative" v-if="actions.length > 0">
         <button id="dropdownDefaultButton" data-dropdown-toggle="dropdown" @click="toggleDropDown"
           class="w-fit h-fit cursor-pointer">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="dark:fill-white h-6 w-6">

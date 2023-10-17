@@ -8,6 +8,26 @@
   box-sizing: border-box;
 }
 
+::-webkit-scrollbar {
+  width: 3px;
+  height: 3px;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: rgb(216, 216, 216);
+  border-radius: 40px;
+}
+
+::-webkit-scrollbar-track {
+  background-color: transparent;
+}
+
+::root {
+  scrollbar-color: rgb(216, 216, 216);
+  scrollbar-width: 3px;
+  scrollbar-track-color: transparent;
+}
+
 @layer base {
   body {
     @apply dark:text-light dark:bg-dark;

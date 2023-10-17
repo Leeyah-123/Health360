@@ -22,14 +22,17 @@ const authRequests = () => ({
       })
     }
   },
-  login: async (credentials: { otp: string; phoneNumber: string }, loading?: Ref<boolean>) => {
+  login: async (
+    credentials: { otp: Ref<string>; phoneNumber: Ref<string> },
+    loading?: Ref<boolean>
+  ) => {
     try {
       // ? log user in and get token
       const response: AxiosResponse<{ token: string }> = await useApi(loading).post('/auth/login', {
-        otp: credentials.otp,
+        otp: credentials.otp.value,
         country: 'Nigeria',
         country_code: '+234',
-        phone_number: credentials.phoneNumber
+        phone_number: credentials.phoneNumber.value
       })
 
       const userStore = useUserStore()

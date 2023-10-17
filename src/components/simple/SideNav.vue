@@ -28,7 +28,7 @@ defineProps<{
 
     <div class="flex flex-col h-full gap-2" :aria-hidden="!isNavOpen">
       <li class="w-full p-2">
-        <RouterLink to="/" aria-label="Home" @click="toggleNavOpen" class="flex gap-2 place-items-center "
+        <RouterLink to="/dashboard" aria-label="Home" @click="toggleNavOpen" class="flex gap-2 place-items-center "
           active-class="active">
           <img src="../../assets/icons/view-dashboard.svg" alt="" class="h-7 w-7" />
           Dashboard

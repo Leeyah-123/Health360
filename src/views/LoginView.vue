@@ -16,6 +16,8 @@ const loading = ref(false)
 
 const authenticate = async () => {
   if (otpRequested.value) {
+    if (phoneNumber.value.length > 10) phoneNumber.value = phoneNumber.value.slice(1, 11)
+
     const response = await authRequests().login({ otp, phoneNumber }, loading)
     if (response.success) {
       Notify.success("Login successful")

@@ -7,29 +7,27 @@ import { useUsersStore } from '@/stores/users.store';
 import userRequests from '@/utils/apiRequests/user.requests';
 import type { Role } from '@/utils/types/misc';
 import { Loading, Notify } from 'notiflix';
-import { onMounted, ref, type Ref } from 'vue';
+import { computed, onMounted, ref, type Ref } from 'vue';
 
 // Users Store
 const usersStore = useUsersStore();
-const users = usersStore.users;
+const users = computed(() => usersStore.users);
 const setUsers = usersStore.setUsers;
 
 const activeUser: Ref<UserInterface | null> = ref(null)
 
 // Edit User Role Controls
 const loading: Ref<boolean> = ref(false)
-const userRole: Ref<Role> = ref(activeUser.value?.role || 'user')
+const userRole: Ref<Role> = ref('user')
 const changeUserRole = async () => {
-  if (!users || !activeUser.value) return;
+  if (!users.value || !activeUser.value) return;
   if (activeUser.value.role === userRole.value) return isEditUserModalOpen.value = false
 
-  loading.value = true
-  const response = await userRequests().updateUserRole({ id: activeUser.value.id, role: userRole.value })
-  loading.value = false
+  const response = await userRequests().updateUserRole({ id: activeUser.value.id, role: userRole.value }, loading)
 
   if (response.success) {
-    const index = users.findIndex((user) => user.id === response.data.id);
-    users[index] = response.data;
+    const index = users.value.findIndex((user) => user.id === response.data.id);
+    users.value[index] = response.data;
     toggleEditUserModal()
     return Notify.success("User role updated successfully")
   }
@@ -40,8 +38,10 @@ const changeUserRole = async () => {
 // Modal Controls
 const isEditUserModalOpen: Ref<boolean> = ref(false)
 const openEditUserModal = (index: number) => {
-  if (!users) return
-  activeUser.value = users[index]
+  if (!users.value) return
+
+  activeUser.value = users.value[index]
+  userRole.value = activeUser.value.role
   isEditUserModalOpen.value = true
 }
 const toggleEditUserModal = () => {
@@ -60,9 +60,8 @@ const populateUsersTable = (users: UserInterface[] | undefined) => {
 }
 
 onMounted(async () => {
-  if (!users) {
+  if (!users.value) {
     Loading.hourglass();
-
     const response = await userRequests().getAllUsers();
     Loading.remove();
 
@@ -75,7 +74,7 @@ onMounted(async () => {
     return
   }
 
-  populateUsersTable(users)
+  populateUsersTable(users.value)
 })
 </script>
 
@@ -83,7 +82,7 @@ onMounted(async () => {
   <h2 class="text-lg font-medium mb-5">Users</h2>
 
   <!-- User data table -->
-  <div class="overflow-scroll w-[80vw]">
+  <div class="sm:overflow-scroll w-[80vw]">
     <custom-table :headings="headings" :data="data" :actions="[{ name: 'Edit User Role', func: openEditUserModal }]" />
   </div>
 
@@ -98,6 +97,8 @@ onMounted(async () => {
           <option value="user" class="dark:bg-dark dark:text-light">User</option>
           <option value="admin" class="dark:bg-dark dark:text-light">Admin</option>
         </select>
+
+        <input type="submit" hidden />
       </form>
     </template>
     <template #footer>

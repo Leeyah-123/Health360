@@ -11,7 +11,7 @@ defineProps<{
 <template>
   <p v-if="data.length === 0" class="text-xl font-bold">No record found</p>
 
-  <div class="flex items-center ml-4 sm:ml-0 w-full" v-else>
+  <div class="flex items-center w-full" v-else>
     <table class="text-sm border-separate border-spacing-y-2 w-full">
       <thead class="hidden sm:contents">
         <tr class="tr-class">
@@ -41,7 +41,7 @@ defineProps<{
               class="hidden hover:block z-10 top-0 left-1/2 sm:top-auto sm:-left-1/2 absolute bg-white divide-y divide-gray-100 rounded-lg shadow w-44 dark:bg-gray-700">
               <ul class="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownDefaultButton">
                 <li v-for="action in actions" :key="action.name">
-                  <button @click="() => action.func(i)"
+                  <button @click="action.func(i)"
                     class="w-full px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">{{
                       action.name
                     }}</button>

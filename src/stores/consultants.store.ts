@@ -3,10 +3,10 @@ import { defineStore } from 'pinia'
 import { ref } from 'vue'
 
 export const useConsultantsStore = defineStore('consultants', () => {
-  // users data
+  // consultants data
   const consultants = ref<ConsultantInterface[]>()
 
-  // is users data loading ?
+  // is consultants data loading ?
   const loading = ref(true)
 
   // Set consultants

@@ -1,4 +1,5 @@
 import { useUserStore } from '@/stores/user.store'
+import { COOKIE_TOKEN_KEY } from '@/utils/constants/auth.constants'
 import axios, { type AxiosInstance, type AxiosRequestHeaders } from 'axios'
 import type { Ref } from 'vue'
 
@@ -18,7 +19,7 @@ export const useApi = (isLoading?: Ref<boolean>) => {
     // if user is logged in, append authorization header to the headers object
     if (userSession.isLoggedIn) {
       config.headers = {
-        Authorization: `Bearer ${userSession.token}`
+        Authorization: `Bearer ${userSession.token.get(COOKIE_TOKEN_KEY)}`
       } as AxiosRequestHeaders
     }
 

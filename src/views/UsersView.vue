@@ -3,19 +3,24 @@ import CustomButton from '@/components/simple/CustomButton.vue';
 import CustomModal from '@/components/simple/CustomModal.vue';
 import CustomTable from '@/components/simple/CustomTable.vue';
 import type { UserInterface } from '@/interfaces';
+import { useUsersStore } from '@/stores/users.store';
 import userRequests from '@/utils/apiRequests/user.requests';
 import type { Role } from '@/utils/types/misc';
 import { Loading, Notify } from 'notiflix';
 import { onMounted, ref, type Ref } from 'vue';
 
-const users: Ref<UserInterface[]> = ref([])
+// Users Store
+const usersStore = useUsersStore();
+const users = usersStore.users;
+const setUsers = usersStore.setUsers;
+
 const activeUser: Ref<UserInterface | null> = ref(null)
 
 // Edit User Role Controls
 const loading: Ref<boolean> = ref(false)
 const userRole: Ref<Role> = ref(activeUser.value?.role || 'user')
 const changeUserRole = async () => {
-  if (!activeUser.value) return;
+  if (!users || !activeUser.value) return;
   if (activeUser.value.role === userRole.value) return isEditUserModalOpen.value = false
 
   loading.value = true
@@ -23,8 +28,8 @@ const changeUserRole = async () => {
   loading.value = false
 
   if (response.success) {
-    const index = users.value.findIndex((user) => user.id === response.data.id);
-    (users.value)[index] = response.data;
+    const index = users.findIndex((user) => user.id === response.data.id);
+    users[index] = response.data;
     toggleEditUserModal()
     return Notify.success("User role updated successfully")
   }
@@ -35,7 +40,8 @@ const changeUserRole = async () => {
 // Modal Controls
 const isEditUserModalOpen: Ref<boolean> = ref(false)
 const openEditUserModal = (index: number) => {
-  activeUser.value = (users.value)[index]
+  if (!users) return
+  activeUser.value = users[index]
   isEditUserModalOpen.value = true
 }
 const toggleEditUserModal = () => {
@@ -47,22 +53,27 @@ const toggleEditUserModal = () => {
 const headings: Ref<string[]> = ref([]);
 const data: Ref<UserInterface[]> = ref([]);
 const populateUsersTable = () => {
-  headings.value = Object.keys((users.value)[0])
-  data.value = users.value
+  if (!users) return;
+
+  headings.value = Object.keys(users[0])
+  data.value = users
 }
 
 onMounted(async () => {
-  Loading.hourglass();
+  if (!users) {
+    Loading.hourglass();
 
-  const response = await userRequests().getAllUsers();
-  Loading.remove();
+    const response = await userRequests().getAllUsers();
+    Loading.remove();
 
-  if (!response.success) return Notify.failure(response.message);
+    if (!response.success) return Notify.failure(response.message);
 
-  if (response.data.length > 0) {
-    users.value = response.data as UserInterface[]
-    populateUsersTable()
+    if (response.data.length > 0) {
+      setUsers(response.data)
+    }
   }
+
+  populateUsersTable()
 })
 </script>
 

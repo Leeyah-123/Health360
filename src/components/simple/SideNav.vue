@@ -1,8 +1,22 @@
 <script setup lang="ts">
+import { useUserStore } from '@/stores/user.store';
+import { Confirm } from 'notiflix';
+import { useRouter } from 'vue-router';
+
+const { logoutUser } = useUserStore()
+const router = useRouter()
+
 defineProps<{
   isNavOpen: boolean,
   toggleNavOpen: () => void,
 }>()
+
+const logout = () => {
+  Confirm.show("Logout", "Are you sure you want to log out of your current session?", "Yes", "Cancel", () => {
+    logoutUser()
+    router.push("/auth/login")
+  })
+}
 </script>
 
 <template>
@@ -47,6 +61,12 @@ defineProps<{
           <img src="../../assets/icons/consultant.svg" alt="" class="h-7 w-7" />
           Consultants
         </RouterLink>
+      </li>
+      <li class="w-full p-2">
+        <button aria-label="Log Out" @click="logout" class="flex gap-2 place-items-center">
+          <img src="../../assets/icons/logout.svg" alt="" class="h-7 w-7" />
+          Log Out
+        </button>
       </li>
     </div>
   </ul>

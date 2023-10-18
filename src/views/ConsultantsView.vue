@@ -7,9 +7,14 @@ import CustomModal from '@/components/simple/CustomModal.vue';
 import CustomTable from '@/components/simple/CustomTable.vue';
 
 import type { ConsultantInterface } from '@/interfaces';
+import { useConsultantsStore } from '@/stores/consultants.store';
 import consultantRequests from '@/utils/apiRequests/consultant.requests';
 
-const consultants: Ref<ConsultantInterface[]> = ref([])
+// Consultants store
+const consultantsStore = useConsultantsStore();
+const consultants = consultantsStore.consultants;
+const setConsultants = consultantsStore.setConsultants;
+
 const activeConsultant: Ref<ConsultantInterface | null> = ref(null)
 
 // Edit Consultant Controls
@@ -20,7 +25,9 @@ const toggleEditConsultantModal = () => {
 }
 const editConsultantLoading: Ref<boolean> = ref(false)
 const openEditConsultantModal = (index: number) => {
-  activeConsultant.value = (consultants.value)[index]
+  if (!consultants) return
+
+  activeConsultant.value = consultants[index]
   isEditConsultantModalOpen.value = true
 }
 const editConsultant = () => { }
@@ -34,25 +41,32 @@ const addConsultant = () => { }
 // Consultant Table Controls
 const headings: Ref<string[]> = ref([]);
 const data: Ref<ConsultantInterface[]> = ref([]);
-const populateConsultantsTable = () => {
-  headings.value = Object.keys(consultants.value[0]).filter((value) => value !== 'user')
+const populateConsultantsTable = (consultants: ConsultantInterface[] | undefined) => {
+  if (!consultants) return
 
-  consultants.value.map((consultant) => delete consultant.user)
-  data.value = consultants.value
+  headings.value = Object.keys(consultants[0]).filter((value) => value !== 'user')
+
+  consultants.map((consultant) => delete consultant.user)
+  data.value = consultants
 }
 
 onMounted(async () => {
-  Loading.hourglass();
+  if (!consultants) {
+    Loading.hourglass();
 
-  const response = await consultantRequests().getAllConsultants();
-  Loading.remove();
+    const response = await consultantRequests().getAllConsultants();
+    Loading.remove();
 
-  if (!response.success) return Notify.failure(response.message);
+    if (!response.success) return Notify.failure(response.message);
 
-  if (response.data.length > 0) {
-    consultants.value = response.data as ConsultantInterface[]
-    populateConsultantsTable()
+    if (response.data.length > 0) {
+      setConsultants(response.data)
+      populateConsultantsTable(response.data)
+    }
+    return
   }
+
+  populateConsultantsTable(consultants)
 })
 </script>
 
@@ -62,7 +76,7 @@ onMounted(async () => {
   <!-- Add Consultant Modal -->
   <div class="w-[80vw] flex justify-end mb-3">
     <custom-modal title="Add Consultant" :is-modal-open="isAddConsultantModalOpen" :loading="addConsultantLoading"
-      :toggle-modal="toggleAddConsultantModal" type="button" class="text-sm">
+      :toggle-modal="toggleAddConsultantModal" type="button">
       <template #button>Add Consultant</template>
       <template #body>
         <div class="p-6 space-y-6">
@@ -88,7 +102,7 @@ onMounted(async () => {
 
   <!-- Edit Consultant Modal -->
   <custom-modal title="Edit Consultant" :is-modal-open="isEditConsultantModalOpen" :loading="editConsultantLoading"
-    :toggle-modal="toggleEditConsultantModal" type="button" class="hidden">
+    :toggle-modal="toggleEditConsultantModal" type="button" button-class="hidden">
     <template #button>Edit Consultant</template>
     <template #body>
       <div class="p-6 space-y-6">

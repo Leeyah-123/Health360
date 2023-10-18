@@ -52,7 +52,7 @@ const toggleEditUserModal = () => {
 // Users Table Controls
 const headings: Ref<string[]> = ref([]);
 const data: Ref<UserInterface[]> = ref([]);
-const populateUsersTable = () => {
+const populateUsersTable = (users: UserInterface[] | undefined) => {
   if (!users) return;
 
   headings.value = Object.keys(users[0])
@@ -70,10 +70,12 @@ onMounted(async () => {
 
     if (response.data.length > 0) {
       setUsers(response.data)
+      populateUsersTable(response.data)
     }
+    return
   }
 
-  populateUsersTable()
+  populateUsersTable(users)
 })
 </script>
 
@@ -87,7 +89,7 @@ onMounted(async () => {
 
   <!-- Edit User Modal -->
   <custom-modal title="Edit User Role" :is-modal-open="isEditUserModalOpen" :toggle-modal="toggleEditUserModal"
-    :loading="loading" type="button" class="hidden">
+    :loading="loading" type="button" button-class="hidden">
     <template #button>Edit User Role</template>
     <template #body>
       <form class="p-6 space-y-6" @submit.prevent="changeUserRole">

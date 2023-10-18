@@ -27,6 +27,18 @@ const consultantRequests = () => ({
       })
     }
   },
+  getConsultantCategories: async (loading?: Ref<boolean>) => {
+    try {
+      const response = await useApi(loading).get('/consultant/categories')
+      return apiResponse({ success: true, message: 'Fetched.', data: response.data })
+    } catch (err: any) {
+      return apiResponse({
+        success: false,
+        message: err?.response?.data?.message || err?.message || 'Request error.',
+        error: err
+      })
+    }
+  },
   addConsultant: async (
     data: { user_id: string; bio: string; services: string[]; specializations: string[] },
     loading?: Ref<boolean>

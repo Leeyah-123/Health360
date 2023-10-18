@@ -19,6 +19,7 @@ const setConsultants = (newConsultants: ConsultantInterface[]) => {
   populateConsultantsTable(newConsultants)
   consultantsStore.setConsultants(newConsultants)
 }
+const categories = ref<string[]>()
 
 // Users store
 const usersStore = useUsersStore();
@@ -30,7 +31,7 @@ const fetchUsers = async () => {
   setUsers(response.data)
 }
 
-const activeConsultant: Ref<ConsultantInterface | null> = ref(null)
+const activeConsultant = ref<ConsultantInterface | null>(null)
 
 /// Add Consultant Controls
 
@@ -38,10 +39,10 @@ const activeConsultant: Ref<ConsultantInterface | null> = ref(null)
 const addUserIdRef = ref(users.value?.[0].id || '')
 const addBioRef = ref('')
 const addServicesRef = ref('')
-const addSpecializationsRef = ref('')
+const addSpecializationsRef = ref<string[]>([])
 
 // Add Consultant Modal Controls
-const isAddConsultantModalOpen: Ref<boolean> = ref(false);
+const isAddConsultantModalOpen = ref<boolean>(false);
 
 const toggleAddConsultantModal = async () => {
   // Fetch users, if necessary
@@ -54,7 +55,7 @@ const toggleAddConsultantModal = async () => {
   isAddConsultantModalOpen.value = !isAddConsultantModalOpen.value
 }
 
-const addConsultantLoading: Ref<boolean> = ref(false)
+const addConsultantLoading = ref<boolean>(false)
 
 // Function to add a new consultant
 const addConsultant = async () => {
@@ -62,9 +63,10 @@ const addConsultant = async () => {
   if (!consultants.value) return
   if (!addUserIdRef.value || !addBioRef.value || !addServicesRef.value || !addSpecializationsRef.value) return Notify.failure("Please enter all fields")
 
-  // split services and specializations into arrays
+  const specializations = addSpecializationsRef.value
+
+  // split services into an array
   const services = addServicesRef.value.split(",").map((service) => service.trim())
-  const specializations = addSpecializationsRef.value.split(",").map((specialization) => specialization.trim())
 
   // send add consultant request
   const response = await consultantRequests().addConsultant({ user_id: addUserIdRef.value, bio: addBioRef.value, services, specializations }, addConsultantLoading)
@@ -88,14 +90,14 @@ const resetAddConsultantForm = () => {
   addUserIdRef.value = ""
   addBioRef.value = ""
   addServicesRef.value = ""
-  addSpecializationsRef.value = ""
+  addSpecializationsRef.value = []
 }
 
 /// Edit Consultant Controls
 // Input refs
 const editBioRef = ref('')
 const editServicesRef = ref('')
-const editSpecializationsRef = ref('')
+const editSpecializationsRef = ref<string[]>([])
 
 // Edit Consultant modal controls
 const isEditConsultantModalOpen: Ref<boolean> = ref(false)
@@ -110,7 +112,7 @@ const openEditConsultantModal = (index: number) => {
   activeConsultant.value = (consultants.value)[index]
   editBioRef.value = activeConsultant.value?.bio
   editServicesRef.value = activeConsultant.value?.services?.join(", ")
-  editSpecializationsRef.value = activeConsultant.value?.specializations?.join(", ")
+  editSpecializationsRef.value = activeConsultant.value?.specializations
   isEditConsultantModalOpen.value = true
 }
 
@@ -121,9 +123,9 @@ const editConsultant = async () => {
   if (!editBioRef.value || !editServicesRef.value || !editSpecializationsRef.value) return Notify.failure("Please enter all fields")
 
   const bio = editBioRef.value
-  // Split services and specializations into arrays
+  const specializations = editSpecializationsRef.value
+  // Split services into an array
   const services = editServicesRef.value.split(",").map((service) => service.trim())
-  const specializations = editSpecializationsRef.value.split(",").map((specialization) => specialization.trim())
 
   // Send update consultant request
   const response = await consultantRequests().updateConsultant({ id: activeConsultant.value.id, bio, services, specializations }, editConsultantLoading)
@@ -146,7 +148,7 @@ const editConsultant = async () => {
 const resetEditConsultantForm = () => {
   editBioRef.value = ""
   editServicesRef.value = ""
-  editSpecializationsRef.value = ""
+  editSpecializationsRef.value = []
 }
 
 // Delete Consultant Controls
@@ -188,10 +190,15 @@ const populateConsultantsTable = (consultants: ConsultantInterface[] | undefined
 }
 
 onMounted(async () => {
+  if (!categories.value) {
+    const response = await consultantRequests().getConsultantCategories()
+    if (!response.success) Notify.failure(response.message)
+    else categories.value = response.data
+  }
+
   // Fetch consultants and populate consultants table
   if (!consultants.value) {
     Loading.hourglass();
-
     const response = await consultantRequests().getAllConsultants();
     Loading.remove();
 
@@ -233,8 +240,17 @@ onMounted(async () => {
             v-model="addServicesRef" type="text" placeholder="Enter Services" aria-label="Services" />
           <input
             class="px-2 py-3 w-full rounded-md outline outline-1 outline-slate-400 hover:outline-slate-600 focus-visible:outline-[3px] dark:hover:outline-slate-100 transition-shadow duration-700 bg-transparent"
-            v-model="addSpecializationsRef" type="text" placeholder="Enter Specializations"
-            aria-label="Specializations" />
+            :value="addSpecializationsRef" type="text" placeholder="Selected Specializations" aria-label="Specializations"
+            readonly />
+
+          <select
+            class="px-2 py-3 w-full rounded-md outline outline-1 outline-slate-400 hover:outline-slate-600 focus-visible:outline-[3px] dark:hover:outline-slate-100 transition-shadow duration-700 bg-transparent"
+            v-model="addSpecializationsRef" type="text" aria-label="User ID" multiple>
+            <option v-if="users?.length === 0" class="opacity-50" value="">No Specializations</option>
+            <option v-for="category in categories" :key="category" :value="category">
+              {{ category }}
+            </option>
+          </select>
 
           <input type="submit" hidden />
         </form>
@@ -270,8 +286,16 @@ onMounted(async () => {
           v-model="editServicesRef" type="text" placeholder="Enter New Services" aria-label="Services" />
         <input
           class="px-2 py-3 w-full rounded-md outline outline-1 outline-slate-400 hover:outline-slate-600 focus-visible:outline-[3px] dark:hover:outline-slate-100 transition-shadow duration-700 bg-transparent"
-          v-model="editSpecializationsRef" type="text" placeholder="Enter New Specializations"
-          aria-label="Specializations" />
+          :value="editSpecializationsRef" type="text" placeholder="Selected Specializations" aria-label="Specializations"
+          readonly />
+        <select
+          class="px-2 py-3 w-full rounded-md outline outline-1 outline-slate-400 hover:outline-slate-600 focus-visible:outline-[3px] dark:hover:outline-slate-100 transition-shadow duration-700 bg-transparent"
+          v-model="editSpecializationsRef" type="text" multiple>
+          <option v-if="users?.length === 0" class="opacity-50" value="">No Specializations</option>
+          <option v-for="category in categories" :key="category" :value="category">
+            {{ category }}
+          </option>
+        </select>
 
         <input type="submit" hidden />
       </form>

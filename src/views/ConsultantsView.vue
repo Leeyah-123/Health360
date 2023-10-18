@@ -1,39 +1,44 @@
 <script setup lang="ts">
-import CustomModal from '@/components/simple/CustomModal.vue';
-import CustomTable from '@/components/simple/CustomTable.vue';
-import type { ConsultantInterface } from '@/interfaces';
-import consultantRequests from '@/utils/apiRequests/consultant.requests';
 import { Loading, Notify } from 'notiflix';
 import { onMounted, ref, type Ref } from 'vue';
+
+import CustomButton from '@/components/simple/CustomButton.vue';
+import CustomModal from '@/components/simple/CustomModal.vue';
+import CustomTable from '@/components/simple/CustomTable.vue';
+
+import type { ConsultantInterface } from '@/interfaces';
+import consultantRequests from '@/utils/apiRequests/consultant.requests';
 
 const consultants: Ref<ConsultantInterface[]> = ref([])
 const activeConsultant: Ref<ConsultantInterface | null> = ref(null)
 
-const headings: Ref<string[]> = ref([]);
-const data: Ref<string[][]> = ref([]);
-
+// Edit Consultant Controls
 const isEditConsultantModalOpen: Ref<boolean> = ref(false)
 const toggleEditConsultantModal = () => {
   if (isEditConsultantModalOpen.value) activeConsultant.value = null
   isEditConsultantModalOpen.value = !isEditConsultantModalOpen.value
 }
-
-const isAddConsultantModalOpen: Ref<boolean> = ref(false);
-const toggleAddConsultantModal = () => isAddConsultantModalOpen.value = !isAddConsultantModalOpen.value
-
-const populateConsultantsTable = () => {
-  headings.value = Object.keys(consultants.value[0]).filter((value) => value !== 'user')
-
-  const values = Object.values(consultants.value)
-  values.forEach((row: any) => {
-    delete row.user
-    data.value.push(Object.values(row))
-  })
-}
-
+const editConsultantLoading: Ref<boolean> = ref(false)
 const openEditConsultantModal = (index: number) => {
   activeConsultant.value = (consultants.value)[index]
   isEditConsultantModalOpen.value = true
+}
+const editConsultant = () => { }
+
+// Add Consultant Controls
+const isAddConsultantModalOpen: Ref<boolean> = ref(false);
+const toggleAddConsultantModal = () => isAddConsultantModalOpen.value = !isAddConsultantModalOpen.value
+const addConsultantLoading: Ref<boolean> = ref(false)
+const addConsultant = () => { }
+
+// Consultant Table Controls
+const headings: Ref<string[]> = ref([]);
+const data: Ref<ConsultantInterface[]> = ref([]);
+const populateConsultantsTable = () => {
+  headings.value = Object.keys(consultants.value[0]).filter((value) => value !== 'user')
+
+  consultants.value.map((consultant) => delete consultant.user)
+  data.value = consultants.value
 }
 
 onMounted(async () => {
@@ -56,7 +61,7 @@ onMounted(async () => {
 
   <!-- Add Consultant Modal -->
   <div class="w-[80vw] flex justify-end mb-3">
-    <custom-modal title="Add Consultant" :is-modal-open="isAddConsultantModalOpen"
+    <custom-modal title="Add Consultant" :is-modal-open="isAddConsultantModalOpen" :loading="addConsultantLoading"
       :toggle-modal="toggleAddConsultantModal" type="button" class="text-sm">
       <template #button>Add Consultant</template>
       <template #body>
@@ -66,11 +71,10 @@ onMounted(async () => {
       </template>
       <template #footer>
         <div class="flex items-center p-6 space-x-2 border-t border-gray-200 rounded-b dark:border-gray-600">
-          <button data-modal-hide="defaultModal" type="button"
-            class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">I
-            accept</button>
-          <button data-modal-hide="defaultModal" type="button"
-            class="text-gray-500 bg-white hover:bg-gray-100 focus:ring-4 focus:outline-none focus:ring-blue-300 rounded-lg border border-gray-200 text-sm font-medium px-5 py-2.5 hover:text-gray-900 focus:z-10 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-500 dark:hover:text-white dark:hover:bg-gray-600 dark:focus:ring-gray-600">Decline</button>
+          <custom-button data-modal-hide="defaultModal" type="button" :handle-click="addConsultant"
+            :loading="addConsultantLoading" class="text-sm">Save</custom-button>
+          <button data-modal-hide="defaultModal" type="button" @click="toggleAddConsultantModal"
+            class="text-gray-500 bg-white hover:bg-gray-100 focus:ring-4 focus:outline-none focus:ring-blue-300 rounded-lg border border-gray-200 text-sm font-medium px-5 py-2.5 hover:text-gray-900 focus:z-10 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-500 dark:hover:text-white dark:hover:bg-gray-600 dark:focus:ring-gray-600">Cancel</button>
         </div>
       </template>
     </custom-modal>
@@ -83,7 +87,7 @@ onMounted(async () => {
   </div>
 
   <!-- Edit Consultant Modal -->
-  <custom-modal title="Edit Consultant" :is-modal-open="isEditConsultantModalOpen"
+  <custom-modal title="Edit Consultant" :is-modal-open="isEditConsultantModalOpen" :loading="editConsultantLoading"
     :toggle-modal="toggleEditConsultantModal" type="button" class="hidden">
     <template #button>Edit Consultant</template>
     <template #body>
@@ -93,9 +97,9 @@ onMounted(async () => {
     </template>
     <template #footer>
       <div class="flex items-center p-6 space-x-2 border-t border-gray-200 rounded-b dark:border-gray-600">
-        <button data-modal-hide="defaultModal" type="button"
-          class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Save</button>
-        <button data-modal-hide="defaultModal" type="button"
+        <custom-button data-modal-hide="defaultModal" type="button" :handle-click="editConsultant"
+          :loading="editConsultantLoading" class="text-sm">Save</custom-button>
+        <button data-modal-hide="defaultModal" type="button" @click="toggleEditConsultantModal"
           class="text-gray-500 bg-white hover:bg-gray-100 focus:ring-4 focus:outline-none focus:ring-blue-300 rounded-lg border border-gray-200 text-sm font-medium px-5 py-2.5 hover:text-gray-900 focus:z-10 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-500 dark:hover:text-white dark:hover:bg-gray-600 dark:focus:ring-gray-600">Cancel</button>
       </div>
     </template>

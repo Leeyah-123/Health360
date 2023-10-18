@@ -29,9 +29,9 @@ const userRequests = () => ({
       })
     }
   },
-  updateUserRole: async (data: { id: Ref<string>; role: Role }, loading?: Ref<boolean>) => {
+  updateUserRole: async (data: { id: string; role: Role }, loading?: Ref<boolean>) => {
     try {
-      const response: AxiosResponse<{ token: string }> = await useApi(loading).post(
+      const response: AxiosResponse<{ token: string }> = await useApi(loading).patch(
         '/user/admin/update',
         data
       )

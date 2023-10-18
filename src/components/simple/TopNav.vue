@@ -8,7 +8,7 @@ defineProps<{
 </script>
 
 <template>
-  <div class="fixed flex justify-between z-20 inset-0 bottom-auto bg-light dark:bg-darkBlue p-5">
+  <div class="fixed flex justify-between z-30 inset-0 bottom-auto bg-light dark:bg-darkBlue p-5">
     <!-- Hamburger Icon -->
     <button aria-controls="primary-navigation" :aria-expanded="isNavOpen"
       class="lg:hidden h-10 w-10 p-2 rounded-md border border-dark dark:border-light transition-transform hover:scale-105 focus-visible:scale-105"

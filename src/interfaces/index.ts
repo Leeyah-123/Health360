@@ -19,7 +19,7 @@ export interface ConsultantInterface {
   bio: string
   services: string[]
   specialization: string[]
-  user: UserInterface
+  user?: UserInterface
   created_at: string
   updated_at: string
 }

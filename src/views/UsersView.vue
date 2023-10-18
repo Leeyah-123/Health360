@@ -39,7 +39,7 @@ onMounted(async () => {
 <template>
   <h2 class="text-lg font-medium mb-5">All Users</h2>
 
-  <div class="overflow-scroll">
+  <div class="overflow-scroll w-[80vw]">
     <custom-table :headings="headings" :data="data" :actions="[{ name: 'Edit User Role', func: EditUserRole }]" />
   </div>
 </template>

@@ -7,7 +7,7 @@ defineProps<{
 
 <template>
   <ul
-    class="-translate-x-[100%] transition-transform bg-darkBlue text-light p-5 fixed inset-0 right-auto lg:translate-x-0"
+    class="z-20 -translate-x-[100%] transition-transform bg-darkBlue text-light p-5 fixed inset-0 right-auto lg:translate-x-0"
     :class="isNavOpen && 'translate-x-0'" id="primary-navigation">
     <div class="flex p-2 mb-2 place-items-center">
       <h1 class="text-2xl text-primary mr-3">Health360</h1>

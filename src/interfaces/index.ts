@@ -12,3 +12,13 @@ export interface UserInterface {
   created_at: string
   updated_at: string
 }
+
+export interface ConsultantInterface {
+  id: string
+  user_id: string
+  services: string[]
+  specialization: string[]
+  user: UserInterface
+  created_at: string
+  updated_at: string
+}

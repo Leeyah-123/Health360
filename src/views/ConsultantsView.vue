@@ -13,7 +13,10 @@ import consultantRequests from '@/utils/apiRequests/consultant.requests';
 // Consultants store
 const consultantsStore = useConsultantsStore();
 const consultants = computed(() => consultantsStore.consultants);
-const setConsultants = consultantsStore.setConsultants;
+const setConsultants = (newConsultants: ConsultantInterface[]) => {
+  populateConsultantsTable(newConsultants)
+  consultantsStore.setConsultants(newConsultants)
+}
 
 const activeConsultant: Ref<ConsultantInterface | null> = ref(null)
 
@@ -36,6 +39,14 @@ const addConsultant = async () => {
 
   const response = await consultantRequests().addConsultant({ user_id: addUserIdRef.value, bio: addBioRef.value, services, specializations }, addConsultantLoading)
   if (!response.success) return Notify.failure(response.message)
+
+  const newConsultants = [...consultants.value, response.data]
+  setConsultants(newConsultants)
+
+  addUserIdRef.value = ""
+  addBioRef.value = ""
+  addServicesRef.value = ""
+  addSpecializationsRef.value = ""
 
   toggleAddConsultantModal()
   Notify.success(response.message)
@@ -77,6 +88,11 @@ const editConsultant = async () => {
   const index = consultants.value?.findIndex((consultant) => consultant.id === response.data.id)
   consultants.value[index] = response.data
   toggleEditConsultantModal()
+
+  editBioRef.value = ""
+  editServicesRef.value = ""
+  editSpecializationsRef.value = ""
+
   Notify.success(response.message)
 }
 
@@ -91,7 +107,8 @@ const deleteConsultant = (index: number) => {
     Loading.remove()
 
     if (response.success) {
-      consultants.value?.filter((consultant) => consultant.id !== activeConsultant.id)
+      const newConsultants = (consultants.value)?.filter((consultant) => consultant.id !== activeConsultant.id) as ConsultantInterface[]
+      setConsultants(newConsultants)
       Notify.success('Consultant deleted successfully');
       return
     }
@@ -123,7 +140,6 @@ onMounted(async () => {
 
     if (response.data.length > 0) {
       setConsultants(response.data)
-      populateConsultantsTable(response.data)
     }
     return
   }

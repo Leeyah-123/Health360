@@ -8,7 +8,9 @@ import CustomTable from '@/components/simple/CustomTable.vue';
 
 import type { ConsultantInterface } from '@/interfaces';
 import { useConsultantsStore } from '@/stores/consultants.store';
+import { useUsersStore } from '@/stores/users.store';
 import consultantRequests from '@/utils/apiRequests/consultant.requests';
+import userRequests from '@/utils/apiRequests/user.requests';
 
 // Consultants store
 const consultantsStore = useConsultantsStore();
@@ -18,45 +20,84 @@ const setConsultants = (newConsultants: ConsultantInterface[]) => {
   consultantsStore.setConsultants(newConsultants)
 }
 
+// Users store
+const usersStore = useUsersStore();
+const users = computed(() => usersStore.users)
+const setUsers = usersStore.setUsers
+const fetchUsers = async () => {
+  const response = await userRequests().getAllUsers()
+  if (!response.success) return Notify.failure(response.message)
+  setUsers(response.data)
+}
+
 const activeConsultant: Ref<ConsultantInterface | null> = ref(null)
 
-// Add Consultant Controls
-const addUserIdRef = ref('')
+/// Add Consultant Controls
+
+// Input Refs
+const addUserIdRef = ref(users.value?.[0].id || '')
 const addBioRef = ref('')
 const addServicesRef = ref('')
 const addSpecializationsRef = ref('')
 
+// Add Consultant Modal Controls
 const isAddConsultantModalOpen: Ref<boolean> = ref(false);
-const toggleAddConsultantModal = () => isAddConsultantModalOpen.value = !isAddConsultantModalOpen.value
-const addConsultantLoading: Ref<boolean> = ref(false)
-const addConsultant = async () => {
-  if (!consultants.value) return
 
+const toggleAddConsultantModal = async () => {
+  // Fetch users, if necessary
+  if (!isAddConsultantModalOpen.value && !users.value) {
+    Loading.hourglass('Fetching users')
+    fetchUsers()
+    Loading.remove()
+  }
+
+  isAddConsultantModalOpen.value = !isAddConsultantModalOpen.value
+}
+
+const addConsultantLoading: Ref<boolean> = ref(false)
+
+// Function to add a new consultant
+const addConsultant = async () => {
+  // Validations
+  if (!consultants.value) return
   if (!addUserIdRef.value || !addBioRef.value || !addServicesRef.value || !addSpecializationsRef.value) return Notify.failure("Please enter all fields")
 
+  // split services and specializations into arrays
   const services = addServicesRef.value.split(",").map((service) => service.trim())
   const specializations = addSpecializationsRef.value.split(",").map((specialization) => specialization.trim())
 
+  // send add consultant request
   const response = await consultantRequests().addConsultant({ user_id: addUserIdRef.value, bio: addBioRef.value, services, specializations }, addConsultantLoading)
   if (!response.success) return Notify.failure(response.message)
 
+  // update consultants
   const newConsultants = [...consultants.value, response.data]
   setConsultants(newConsultants)
 
+  // reset form
+  resetAddConsultantForm()
+
+  // close modal
+  toggleAddConsultantModal()
+
+  // display toast notification
+  Notify.success(response.message)
+}
+
+const resetAddConsultantForm = () => {
   addUserIdRef.value = ""
   addBioRef.value = ""
   addServicesRef.value = ""
   addSpecializationsRef.value = ""
-
-  toggleAddConsultantModal()
-  Notify.success(response.message)
 }
 
-// Edit Consultant Controls
+/// Edit Consultant Controls
+// Input refs
 const editBioRef = ref('')
 const editServicesRef = ref('')
 const editSpecializationsRef = ref('')
 
+// Edit Consultant modal controls
 const isEditConsultantModalOpen: Ref<boolean> = ref(false)
 const toggleEditConsultantModal = () => {
   if (isEditConsultantModalOpen.value) activeConsultant.value = null
@@ -72,28 +113,40 @@ const openEditConsultantModal = (index: number) => {
   editSpecializationsRef.value = activeConsultant.value?.specializations?.join(", ")
   isEditConsultantModalOpen.value = true
 }
-const editConsultant = async () => {
-  if (!consultants.value || !activeConsultant.value) return
 
+// Function to update a consultant's details
+const editConsultant = async () => {
+  // Validations
+  if (!consultants.value || !activeConsultant.value) return
   if (!editBioRef.value || !editServicesRef.value || !editSpecializationsRef.value) return Notify.failure("Please enter all fields")
 
   const bio = editBioRef.value
+  // Split services and specializations into arrays
   const services = editServicesRef.value.split(",").map((service) => service.trim())
   const specializations = editSpecializationsRef.value.split(",").map((specialization) => specialization.trim())
 
-
+  // Send update consultant request
   const response = await consultantRequests().updateConsultant({ id: activeConsultant.value.id, bio, services, specializations }, editConsultantLoading)
   if (!response.success) return Notify.failure(response.message)
 
+  // Update consultants in store
   const index = consultants.value?.findIndex((consultant) => consultant.id === response.data.id)
   consultants.value[index] = response.data
+
+  // reset form
+  resetEditConsultantForm()
+
+  // Close Modal
   toggleEditConsultantModal()
 
+  // Display toast notification
+  Notify.success(response.message)
+}
+
+const resetEditConsultantForm = () => {
   editBioRef.value = ""
   editServicesRef.value = ""
   editSpecializationsRef.value = ""
-
-  Notify.success(response.message)
 }
 
 // Delete Consultant Controls
@@ -101,18 +154,23 @@ const deleteConsultant = (index: number) => {
   if (!consultants.value) return
 
   const activeConsultant = consultants.value[index]
+
+  // Display a confirmation dialog
   Confirm.show('Delete Consultant', 'Are you sure you want to delete this consultant?', 'Yes', 'Cancel', async () => {
     Loading.dots('Deleting Consultant...')
     const response = await consultantRequests().deleteConsultant(activeConsultant.id)
     Loading.remove()
 
     if (response.success) {
+      // Update consultants in store
       const newConsultants = (consultants.value)?.filter((consultant) => consultant.id !== activeConsultant.id) as ConsultantInterface[]
       setConsultants(newConsultants)
+      // Display toast notification
       Notify.success('Consultant deleted successfully');
       return
     }
 
+    // Display error notification, if any
     Notify.failure(response.message)
   })
 }
@@ -130,6 +188,7 @@ const populateConsultantsTable = (consultants: ConsultantInterface[] | undefined
 }
 
 onMounted(async () => {
+  // Fetch consultants and populate consultants table
   if (!consultants.value) {
     Loading.hourglass();
 
@@ -158,9 +217,14 @@ onMounted(async () => {
       <template #button>Add Consultant</template>
       <template #body>
         <form class="flex flex-col p-6 space-y-6" @submit.prevent="addConsultant">
-          <input
+          <select
             class="px-2 py-3 w-full rounded-md outline outline-1 outline-slate-400 hover:outline-slate-600 focus-visible:outline-[3px] dark:hover:outline-slate-100 transition-shadow duration-700 bg-transparent"
-            v-model="addUserIdRef" type="text" placeholder="Enter User ID" aria-label="User ID" />
+            v-model="addUserIdRef" type="text" placeholder="Enter User ID" aria-label="User ID">
+            <option v-if="users?.length === 0" class="dark:bg-dark dark:text-light" value="">No User</option>
+            <option class="dark:bg-dark dark:text-light" v-for="user in users" :key="user.id" :value="user.id">
+              {{ user.full_name || user.id }}
+            </option>
+          </select>
           <input
             class="px-2 py-3 w-full rounded-md outline outline-1 outline-slate-400 hover:outline-slate-600 focus-visible:outline-[3px] dark:hover:outline-slate-100 transition-shadow duration-700 bg-transparent"
             v-model="addBioRef" type="text" placeholder="Enter Bio" aria-label="Bio" />

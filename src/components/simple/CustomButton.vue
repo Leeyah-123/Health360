@@ -1,14 +1,15 @@
 <script setup lang="ts">
 defineProps<{
-  type: 'button' | 'reset' | 'submit'
+  type?: 'button' | 'reset' | 'submit'
   class?: string
-  loading: boolean
+  loading?: boolean
+  handleClick?: () => void
 }>()
 </script>
 
 <template>
-  <button :type="type"
-    class="px-2 py-3 border-2 border-black rounded-md transition-colors duration-500 hover:bg-slate-200 dark:bg-slate-50 dark:hover:bg-slate-300 dark:text-black font-medium"
+  <button :type="type || 'button'" @click="handleClick"
+    class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
     :class="$props.class" :disabled="loading">
     <slot v-if="!loading"></slot>
 

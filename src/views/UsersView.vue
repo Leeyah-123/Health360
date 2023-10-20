@@ -82,7 +82,7 @@ onMounted(async () => {
   <h2 class="text-lg font-medium mb-5">Users</h2>
 
   <!-- User data table -->
-  <div class="sm:overflow-scroll w-[80vw]">
+  <div class="overflow-scroll w-[80vw]">
     <custom-table :headings="headings" :data="data" :actions="[{ name: 'Edit User Role', func: openEditUserModal }]" />
   </div>
 

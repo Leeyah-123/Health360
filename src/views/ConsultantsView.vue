@@ -226,7 +226,7 @@ onMounted(async () => {
         <form class="flex flex-col p-6 space-y-6" @submit.prevent="addConsultant">
           <select
             class="px-2 py-3 w-full rounded-md outline outline-1 outline-slate-400 hover:outline-slate-600 focus-visible:outline-[3px] dark:hover:outline-slate-100 transition-shadow duration-700 bg-transparent"
-            v-model="addUserIdRef" type="text" placeholder="Enter User ID" aria-label="User ID">
+            v-model="addUserIdRef" placeholder="Enter User ID" aria-label="User ID">
             <option v-if="users?.length === 0" class="dark:bg-dark dark:text-light" value="">No User</option>
             <option class="dark:bg-dark dark:text-light" v-for="user in users" :key="user.id" :value="user.id">
               {{ user.full_name || user.id }}
@@ -245,7 +245,7 @@ onMounted(async () => {
 
           <select
             class="px-2 py-3 w-full rounded-md outline outline-1 outline-slate-400 hover:outline-slate-600 focus-visible:outline-[3px] dark:hover:outline-slate-100 transition-shadow duration-700 bg-transparent"
-            v-model="addSpecializationsRef" type="text" aria-label="User ID" multiple>
+            v-model="addSpecializationsRef" aria-label="User ID" multiple>
             <option v-if="users?.length === 0" class="opacity-50" value="">No Specializations</option>
             <option v-for="category in categories" :key="category" :value="category">
               {{ category }}
@@ -290,7 +290,7 @@ onMounted(async () => {
           readonly />
         <select
           class="px-2 py-3 w-full rounded-md outline outline-1 outline-slate-400 hover:outline-slate-600 focus-visible:outline-[3px] dark:hover:outline-slate-100 transition-shadow duration-700 bg-transparent"
-          v-model="editSpecializationsRef" type="text" multiple>
+          v-model="editSpecializationsRef" multiple>
           <option v-if="users?.length === 0" class="opacity-50" value="">No Specializations</option>
           <option v-for="category in categories" :key="category" :value="category">
             {{ category }}

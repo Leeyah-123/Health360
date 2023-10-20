@@ -46,8 +46,8 @@
     @apply flex flex-col mb-4 sm:table-row;
   }
 
-  .action-btn:hover + div,
   .action-btn:focus + div,
+  .action-btn:focus-within + div,
   .action-btn:focus-visible + div {
     @apply block;
   }

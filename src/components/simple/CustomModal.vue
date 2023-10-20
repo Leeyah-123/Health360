@@ -1,12 +1,21 @@
 <script setup lang="ts">
+import { watch } from 'vue';
 
-defineProps<{
+const props = defineProps<{
   title: string
   buttonClass?: string
   isModalOpen: boolean
   toggleModal: () => void
   loading?: boolean
 }>()
+
+watch(() => props.isModalOpen, (newValue) => {
+  if (newValue === true) {
+    document.body.style.overflow = "hidden"
+  } else {
+    document.body.style.overflow = "revert"
+  }
+})
 </script>
 
 <template>
@@ -19,8 +28,8 @@ defineProps<{
       <slot name="button"></slot>
     </button>
 
-    <div id="defaultModal" role="dialog" tabindex="-1" :aria-hidden="!isModalOpen"
-      class="fixed top-0 left-0 right-0 z-20 w-full p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-[calc(100%-1rem)] max-h-full"
+    <div id="defaultModal" role="dialog" :aria-hidden="!isModalOpen"
+      class="fixed top-0 left-0 right-0 z-30 w-full p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-[calc(100%-1rem)] max-h-full"
       :class="isModalOpen ? 'block' : 'hidden'">
       <div class="relative w-full max-w-2xl max-h-full top-1/2 -translate-y-1/2 left-1/2 -translate-x-1/2">
         <!-- Modal content -->

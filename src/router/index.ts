@@ -15,19 +15,20 @@ const router = createRouter({
         else return true
       },
       children: [
+        { path: '/', redirect: '/dashboard' },
         {
-          path: '/dashboard',
+          path: 'dashboard',
           name: 'dashboard',
           component: DashboardView
         },
         {
-          path: '/users',
+          path: 'users',
           name: 'users',
           props: () => {},
           component: () => import('../views/UsersView.vue')
         },
         {
-          path: '/consultants',
+          path: 'consultants',
           name: 'consultants',
           component: () => import('../views/ConsultantsView.vue')
         }

@@ -1,5 +1,5 @@
 import DashboardLayout from '@/components/layout/dashboard/dashboard.layout.vue'
-import { isUserLoggedIn, userIsAdmin } from '@/plugins/auth.plugin'
+import { isUserLoggedIn } from '@/plugins/auth.plugin'
 import { createRouter, createWebHistory } from 'vue-router'
 import DashboardView from '../views/DashboardView.vue'
 
@@ -12,7 +12,6 @@ const router = createRouter({
       beforeEnter: () => {
         // reject the navigation if user is logged in
         if (!isUserLoggedIn()) return { path: '/auth/login' }
-        else if (!userIsAdmin()) return { path: '/401' }
         else return true
       },
       children: [
@@ -46,11 +45,6 @@ const router = createRouter({
       children: [
         { path: 'login', name: 'login', component: () => import('../views/LoginView.vue') }
       ]
-    },
-    {
-      path: '/401',
-      name: 'Unauthorized',
-      component: () => import('../views/UnauthorizedView.vue')
     }
   ]
 })

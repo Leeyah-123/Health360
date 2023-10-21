@@ -17,6 +17,12 @@ export function isUserLoggedIn() {
   return userStore.isLoggedIn
 }
 
+export function userIsAdmin() {
+  const userStore = useUserStore()
+
+  return userStore.user?.role === 'admin'
+}
+
 export default {
   install() {}
 }
